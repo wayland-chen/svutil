@@ -26,6 +26,7 @@ module SVUtil
     private
       def shutdown
         Log.info "Shutting Down"
+        @klass.shutdown if @klass.respond_to?(:shutdown)
         remove_pid_file
         exit 0
       end
