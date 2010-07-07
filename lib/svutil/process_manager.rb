@@ -10,23 +10,24 @@ module SVUtil
       daemonize if SVUtil::config.daemon
       write_pid_file
       @klass = klass
+      @server_instance = @klass.new
     end
 
     def start
-			begin
-        @klass.new.run
-			rescue
-				puts $!
-			ensure
-				remove_pid_file
-				exit 1
-			end
+      begin
+        @server_instance.run
+      rescue
+        STDERR.puts $!
+      ensure
+        remove_pid_file
+        exit 1
+      end
     end
 
     private
       def shutdown
         Log.info "Shutting Down"
-        @klass.shutdown if @klass.respond_to?(:shutdown)
+        @server_instance.shutdown if @server_instance.respond_to?(:shutdown)
         remove_pid_file
         exit 0
       end
