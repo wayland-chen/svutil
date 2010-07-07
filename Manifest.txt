@@ -1,0 +1,11 @@
+History.txt
+Manifest.txt
+PostInstall.txt
+README.rdoc
+Rakefile
+lib/svutil.rb
+lib/svutil/log.rb
+lib/svutil/config.rb
+lib/svutil/process_manager.rb
+test/test_helper.rb
+test/test_svutil.rb
