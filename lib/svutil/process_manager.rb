@@ -18,6 +18,7 @@ module SVUtil
         @server_instance.run
       rescue
         STDERR.puts $!
+        STDERR.puts $!.backtrace if SVUtil::config.trace
       ensure
         remove_pid_file
         exit 1

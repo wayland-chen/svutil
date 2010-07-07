@@ -70,6 +70,9 @@ module SVUtil
           opts.on("-l", "--debug-log [log-file]", "Debug Log File") do |log|
             self.set(log_file, log)
           end
+          opts.on("-T", "--trace", "Display backtrace on errors") do
+            self.set(:trace, true)
+          end
 	        yield opts if block_given?
 	      end.parse!
       end
