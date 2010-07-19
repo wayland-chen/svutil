@@ -1,6 +1,7 @@
 module SVUtil
   class ProcessManager
     def initialize(klass)
+      # TODO: Add ability for users to specify these signals
       Signal.trap("INT") { shutdown('Interupted') }
       Signal.trap("TERM") { shutdown('Terminated') }
       Signal.trap("PIPE") { shutdown('Broken Pipe') }
@@ -18,12 +19,13 @@ module SVUtil
       begin
         @server_instance.run
       rescue
-        STDERR.puts $!
-        STDERR.puts $!.backtrace if SVUtil::config.trace
-      ensure
-        shutdown("Process Completed")
+        Log.error $!
+        Log.error $!.backtrace if SVUtil::config.trace
+        shutdown("Process Completed with Error")
         exit 1
       end
+      shutdown("Process Completed")
+      exit 0
     end
 
     private
