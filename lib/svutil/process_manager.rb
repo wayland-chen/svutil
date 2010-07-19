@@ -3,6 +3,7 @@ module SVUtil
     def initialize(klass)
       Signal.trap("INT") { shutdown('Interupted') }
       Signal.trap("TERM") { shutdown('Terminated') }
+      Signal.trap("PIPE") { shutdown('Broken Pipe') }
       if running?
         STDERR.puts "There is already a '#{$0}' process running"
         exit 1
