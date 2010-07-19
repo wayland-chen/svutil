@@ -1,8 +1,8 @@
 module SVUtil
   class ProcessManager
     def initialize(klass)
-      Signal.trap("INT") { shutdown }
-      Signal.trap("TERM") { shutdown }
+      Signal.trap("INT") { shutdown('Interupted') }
+      Signal.trap("TERM") { shutdown('Terminated') }
       if running?
         STDERR.puts "There is already a '#{$0}' process running"
         exit 1
@@ -20,14 +20,14 @@ module SVUtil
         STDERR.puts $!
         STDERR.puts $!.backtrace if SVUtil::config.trace
       ensure
-        remove_pid_file
+        shutdown("Process Completed")
         exit 1
       end
     end
 
     private
-      def shutdown
-        Log.info "Shutting Down"
+      def shutdown(reason = nil)
+        Log.info "Shutting Down (#{reason})"
         @server_instance.shutdown if @server_instance.respond_to?(:shutdown)
         remove_pid_file
         exit 0
