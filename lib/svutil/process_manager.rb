@@ -2,9 +2,9 @@ module SVUtil
   class ProcessManager
     def initialize(klass)
       # TODO: Add ability for users to specify these signals
-      Signal.trap("INT") { shutdown('Interupted') }
-      Signal.trap("TERM") { shutdown('Terminated') }
-      Signal.trap("PIPE") { shutdown('Broken Pipe') }
+      Signal.trap("INT") { shutdown('Interupted', 1) }
+      Signal.trap("TERM") { shutdown('Terminated', 2) }
+      Signal.trap("PIPE") { shutdown('Broken Pipe', 4) }
       if running?
         STDERR.puts "There is already a '#{$0}' process running"
         exit 1
@@ -18,22 +18,28 @@ module SVUtil
     def start
       begin
         @server_instance.run
-      rescue
-        Log.error $!
-        Log.error $!.backtrace if SVUtil::config.trace
-        shutdown("Process Completed with Error")
-        exit 1
+      rescue SystemExit => e
+        shutdown("System Exited")
+      rescue Exception => e
+        Log.error(e.message)
+        Log.error(e.backtrace.join("\n")) if SVUtil::config.trace
+        shutdown("Process Completed with Error", 1)
       end
       shutdown("Process Completed")
-      exit 0
     end
 
     private
-      def shutdown(reason = nil)
+      def shutdown(reason = nil, exit_code = 0)
         Log.info "Shutting Down (#{reason})"
-        @server_instance.shutdown if @server_instance.respond_to?(:shutdown)
+        begin
+          @server_instance.shutdown if @server_instance.respond_to?(:shutdown)
+        rescue => e
+          Log.error("Shutdown Callback threw error: #{e.message}")
+          Log.error("Shutdown Callback threw error: #{e.backtrace}") if SVUtil::config.trace
+          Log.info("Shuting down anyway")
+        end
         remove_pid_file
-        exit 0
+        exit exit_code
       end
 
       def running?
