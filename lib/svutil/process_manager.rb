@@ -4,7 +4,9 @@ module SVUtil
       # TODO: Add ability for users to specify these signals
       Signal.trap("INT") { shutdown('Interupted', 1) }
       Signal.trap("TERM") { shutdown('Terminated', 2) }
-      Signal.trap("PIPE") { shutdown('Broken Pipe', 4) }
+      unless RUBY_PLATFORM =~ /(win|w)32$/
+        Signal.trap("PIPE") { shutdown('Broken Pipe', 4) }
+      end
       if running?
         STDERR.puts "There is already a '#{$0}' process running"
         exit 1
