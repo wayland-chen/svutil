@@ -23,8 +23,20 @@ module SVUtil
       def load_and_parse
         process_options
         load_config_file
+        set_defaults
         apply_all
         validate
+      end
+
+      def set_defaults
+        # Overide this method in subclasses
+      end
+
+      def default(name, value)
+      	@temp_hash ||= {}
+        if !@temp_hash.has_key?(name) || @temp_hash[name].nil?
+          set(name, value)
+        end
       end
 
       def set(name, value)
@@ -44,7 +56,11 @@ module SVUtil
 
       def method_missing(method_id, *args)
         return nil unless @hash
-        @hash[method_id.to_s]
+        if method_id.to_s =~ /=$/
+          @hash[method_id.to_s[0...-1]] = args.first
+        else
+          @hash[method_id.to_s]
+        end
       end
 
       def validate
@@ -53,6 +69,7 @@ module SVUtil
           STDERR.puts "PID file must be a writable file"
           exit 1
         end
+        true
       end
 
       def process_options
