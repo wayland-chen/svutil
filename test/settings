@@ -1,0 +1,2 @@
+foo = bar
+log_file = logfile_set_in_config_file

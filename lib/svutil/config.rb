@@ -7,10 +7,32 @@ module SVUtil
   def self.config
     Config.config_class
   end
- 
+
+  class Defaults
+    def initialize
+      @attrs = {}
+    end
+
+    def default_for(name)
+      @attrs[name]
+    end
+
+    private
+      def method_missing(method_id, *args)
+        @attrs ||= {}
+        if method_id.to_s =~ /=$/
+          @attrs[method_id.to_s[0...-1]] = args.first
+        end
+      end
+  end
+
   class Config
     class << self
       attr_writer :config_file
+      attr_reader :attrs
+      attr_reader :defaults
+      # Used mainly for testing
+      attr_accessor :option_source
 
       def config_class
       	subclasses_of(self).first || self
@@ -20,47 +42,17 @@ module SVUtil
 	      @config_file || 'settings'
       end
 
-      def load_and_parse
-        process_options
-        load_config_file
-        set_defaults
-        apply_all
-        validate
-      end
-
-      def set_defaults
-        # Overide this method in subclasses
-      end
-
-      def default(name, value)
-      	@temp_hash ||= {}
-        if !@temp_hash.has_key?(name) || @temp_hash[name].nil?
-          set(name, value)
+      def set(options = {})
+        @attrs ||= {}
+        if block_given?
+          yield self
         end
+        self.validate
       end
 
-      def set(name, value)
-      	@temp_hash ||= {}
-	      @temp_hash[name.to_s] = value
-      end
-
-      def apply(name, value)
-      	@hash ||= {}
-	      @hash[name.to_s] = value
-      end
-
-      def apply_all
-	      @hash ||= {}
-	      @hash.merge!(@temp_hash) if @temp_hash
-      end
-
-      def method_missing(method_id, *args)
-        return nil unless @hash
-        if method_id.to_s =~ /=$/
-          @hash[method_id.to_s[0...-1]] = args.first
-        else
-          @hash[method_id.to_s]
-        end
+      def defaults(&block)
+        @defaults ||= Defaults.new
+        yield @defaults
       end
 
       def validate
@@ -72,29 +64,47 @@ module SVUtil
         true
       end
 
-      def process_options
-        parse_options
-      end
-  
-      def parse_options
-        OptionParser.new do |opts|
-          opts.on("-f", "--config [filename]", "Config file to use (default 'settings')") do |filename|
-      	    self.config_file = filename
-    	    end
-          opts.on("-d", "--daemon", "Run in the background as a daemon") do
-            self.set(:daemon, true)
-          end
-          opts.on("-l", "--debug-log [log-file]", "Debug Log File") do |log|
-            self.set(log_file, log)
-          end
-          opts.on("-T", "--trace", "Display backtrace on errors") do
-            self.set(:trace, true)
-          end
-	        yield opts if block_given?
-	      end.parse!
+      def init
+        self.set do |c|
+          load_config_file
+          parse_options
+        end
       end
 
+      protected
+        def parse_options
+          OptionParser.new do |opts|
+            opts.on("-f", "--config [filename]", "Config file to use (default 'settings')") do |filename|
+              self.config_file = filename.strip
+            end
+            opts.on("-d", "--daemon", "Run in the background as a daemon") do
+              self.daemon = true
+            end
+            opts.on("-l", "--debug-log [log-file]", "Debug Log File") do |log|
+              self.log_file = log
+            end
+            opts.on("-T", "--trace", "Display backtrace on errors") do
+              self.trace = true
+            end
+            yield opts if block_given?
+          end.parse!(self.option_source || ARGV)
+        end
+
       private
+        def method_missing(method_id, *args)
+          @attrs ||= {}
+          if method_id.to_s =~ /=$/
+            @attrs[method_id.to_s[0...-1]] = args.first
+          else
+            value = @attrs[method_id.to_s]
+            if !value && @defaults
+              @defaults.default_for(method_id.to_s)
+            else
+              value
+            end
+          end
+        end
+
         def load_config_file
           contents = ""
           File.open(config_file, "r") { |file| contents << file.read }
@@ -104,7 +114,7 @@ module SVUtil
               STDERR.puts "Invalid config file '#{config_file}'. Syntax error at line #{index + 1}"
               exit 1
             end
-            config_class.apply(pair[0].strip, pair[1].strip)
+            self.send("#{pair[0].strip}=", pair[1].strip)
           end
         end
 
