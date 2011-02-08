@@ -1,5 +1,11 @@
 require File.dirname(__FILE__) + '/test_helper.rb'
 
+class CustomConfig < SVUtil::Config
+  defaults do |c|
+    c.foo = 'bar'
+  end
+end
+
 class TestConfig < Test::Unit::TestCase
   include SVUtil
 
@@ -64,5 +70,9 @@ class TestConfig < Test::Unit::TestCase
 
   def test_validations
 
+  end
+
+  def test_custom_defaults
+    assert_equal 'bar', CustomConfig.foo
   end
 end
