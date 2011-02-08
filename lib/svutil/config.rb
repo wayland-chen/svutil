@@ -66,13 +66,18 @@ module SVUtil
 
       def init
         self.set do |c|
+          process_options
           load_config_file
-          parse_options
         end
       end
 
       protected
-        def parse_options
+        # Overide in subclasses for additional options
+        def process_options
+          parse_options
+        end
+
+        def parse_options(&block)
           OptionParser.new do |opts|
             opts.on("-f", "--config [filename]", "Config file to use (default 'settings')") do |filename|
               self.config_file = filename.strip

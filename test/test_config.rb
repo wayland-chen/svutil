@@ -34,9 +34,9 @@ class TestConfig < Test::Unit::TestCase
 
   def test_standard_cli_options
     Config.expects(:validate).times(1)
-    Config.option_source = [ "-f", "/home/dan/settings", "-d", "-l", "debug", "-T" ]
+    Config.option_source = [ "-f", "test/settings", "-d", "-l", "debug", "-T" ]
     Config.init
-    assert_equal "/home/dan/settings", Config.config_file
+    assert_equal "test/settings", Config.config_file
     assert_equal "debug", Config.log_file
     assert Config.daemon
     assert Config.trace
@@ -49,13 +49,13 @@ class TestConfig < Test::Unit::TestCase
     assert_equal 'bar', Config.foo
   end
 
-  # Command Line wins!
-  def test_cli_overide
+  # Command Line loses!
+  def test_file_overide
     Config.expects(:validate).times(1)
     Config.config_file = "test/settings"
     Config.option_source = [ "-l", "logfile_set_on_cli" ]
     Config.init
-    assert_equal "logfile_set_on_cli", Config.log_file
+    assert_equal "logfile_set_in_config_file", Config.log_file
 
   end
 
