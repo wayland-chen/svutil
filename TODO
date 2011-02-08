@@ -1,1 +1,2 @@
 * Make CLI options overide the file - except for specification of the config file location (obviously)
+* Maybe we can use Active Support to do validations?

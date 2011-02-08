@@ -6,5 +6,5 @@ require 'svutil/log'
 require 'svutil/process_manager'
 
 module SVUtil
-  VERSION = '0.1.2'
+  VERSION = '0.1.3'
 end
