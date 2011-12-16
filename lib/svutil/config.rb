@@ -57,7 +57,7 @@ module SVUtil
 
       def validate
 	      # TODO: Check file perms
-        if (pid_file.nil? or pid_file.empty? or File.directory?(pid_file))
+        if (pid_file.nil? or pid_file.empty? or File.directory?(pid_file) && self.daemon)
           STDERR.puts "PID file must be a writable file"
           exit 1
         end
@@ -93,7 +93,7 @@ module SVUtil
             opts.on("-T", "--trace", "Display backtrace on errors") do
               self.trace = true
             end
-            opts.on("-P", "--pid", "PID File") do |pid|
+            opts.on("-P", "--pid [pid-file]", "PID File") do |pid|
               self.pid_file = pid
             end
             yield opts if block_given?
