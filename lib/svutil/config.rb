@@ -67,7 +67,9 @@ module SVUtil
       def init
         self.set do |c|
           process_options
-          load_config_file
+          if File.exists?("settings") || self.config_file
+            load_config_file
+          end
         end
       end
 

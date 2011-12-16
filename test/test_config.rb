@@ -49,6 +49,13 @@ class TestConfig < Test::Unit::TestCase
     assert_equal 'bar', Config.foo
   end
 
+  def test_load_config_file
+    Config.expects(:load_config_file).times(1)
+    Config.config_file = "test/settings"
+    Config.init
+    assert_equal 'bar', Config.foo
+  end
+
   # Command Line loses!
   def test_file_overide
     Config.expects(:validate).times(1)
@@ -56,7 +63,6 @@ class TestConfig < Test::Unit::TestCase
     Config.option_source = [ "-l", "logfile_set_on_cli" ]
     Config.init
     assert_equal "logfile_set_in_config_file", Config.log_file
-
   end
 
   def test_defaults
