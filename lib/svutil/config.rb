@@ -93,6 +93,9 @@ module SVUtil
             opts.on("-T", "--trace", "Display backtrace on errors") do
               self.trace = true
             end
+            opts.on("-P", "--pid", "PID File") do |pid|
+              self.pid_file = pid
+            end
             yield opts if block_given?
           end.parse!(self.option_source || ARGV)
         end
