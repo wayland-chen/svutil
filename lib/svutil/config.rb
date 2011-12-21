@@ -57,7 +57,7 @@ module SVUtil
 
       def validate
 	      # TODO: Check file perms
-        if (pid_file.nil? or pid_file.empty? or File.directory?(pid_file) && self.daemon)
+        if ((pid_file.nil? or pid_file.empty? or File.directory?(pid_file)) && self.daemon)
           STDERR.puts "PID file must be a writable file"
           exit 1
         end
@@ -67,7 +67,8 @@ module SVUtil
       def init
         self.set do |c|
           process_options
-          if File.exists?("settings") || self.config_file
+          # If there is no config file and we haven't specified one then ignore
+          if File.exists?(self.config_file) || self.config_provided_on_cli
             load_config_file
           end
         end
@@ -83,6 +84,7 @@ module SVUtil
           OptionParser.new do |opts|
             opts.on("-f", "--config [filename]", "Config file to use (default 'settings')") do |filename|
               self.config_file = filename.strip
+              self.config_provided_on_cli = true
             end
             opts.on("-d", "--daemon", "Run in the background as a daemon") do
               self.daemon = true
