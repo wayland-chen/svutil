@@ -38,7 +38,7 @@ module SVUtil
       attr_accessor :cli_options
       attr_accessor :cli_option_handlers
 
-      def self.config_class
+      def config_class
       	subclasses_of(self).first || self
       end
 
