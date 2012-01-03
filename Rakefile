@@ -19,6 +19,7 @@ $hoe = Hoe.spec('svutil') do |p|
   p.remote_rdoc_dir = File.join(path.gsub(/^#{p.rubyforge_name}\/?/,''), 'rdoc')
   p.rsync_args = '-av --delete --ignore-errors'
   p.readme_file = "README.rdoc"
+  p.require_ruby_version(">= 1.9.0")
 end
 
 require 'newgem/tasks' # load /tasks/*.rake
