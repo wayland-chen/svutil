@@ -75,9 +75,9 @@ module SVUtil
 
       def redirect_io
         begin; STDIN.reopen('/dev/null'); rescue Exception; end
-        if SVUtil::config.log_file
+        if @config.log_file
           begin
-            STDOUT.reopen(SVUtil::config.log_file, "a")
+            STDOUT.reopen(@config.log_file, "a")
             STDOUT.sync = true
           rescue Exception
             begin; STDOUT.reopen('/dev/null'); rescue Exception; end
