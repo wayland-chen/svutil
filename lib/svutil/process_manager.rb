@@ -1,9 +1,12 @@
 module SVUtil
   class ProcessManager
-    def initialize(klass, config)
-      @klass = klass
+    def initialize(klass_or_instance, config)
+      @server_instance = if klass_or_instance.instance_of?(Class)
+        klass_or_instance.new
+      else
+        klass_or_instance
+      end
       @config = config
-      @server_instance = @klass.new
 
       # TODO: Add ability for users to specify these signals
       Signal.trap("INT") { shutdown('Interupted', 1) }

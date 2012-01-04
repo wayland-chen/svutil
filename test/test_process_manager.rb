@@ -11,12 +11,20 @@ class TestProcesManager < Test::Unit::TestCase
     Log.stubs(:info)
     @instance = mock()
     @klass = mock
-    @klass.expects(:new).returns(@instance)
+    @klass.stubs(:new).returns(@instance)
+    @klass.stubs(:instance_of?).with(Class).returns(true)
   end
   
   def test_initialize
     config = ServerConfig.new
     ProcessManager.new(@klass, config)
+  end
+
+  def test_initialize_and_start_with_server_instance
+    config = ServerConfig.new
+    pm = ProcessManager.new(@instance, config)
+    @instance.expects(:run)
+    assert_exit { pm.start }
   end
 
   # TODO: Could probably test this better by actually forking

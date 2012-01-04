@@ -146,7 +146,7 @@ module SVUtil
 
       # TODO: This should be moved out to a Validator class
       def err(message)
-        STDERR.puts(message)
+        Log.error(message)
         exit 1
       end
 
