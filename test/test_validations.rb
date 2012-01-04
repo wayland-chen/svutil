@@ -10,17 +10,18 @@ class TestValidations < Test::Unit::TestCase
   include SVUtil
 
   def setup
+    @validated_config = ValidatedConfig.new
   end
   
   def test_custom_validation_error
-    ValidatedConfig.expects(:err).times(1)
-    ValidatedConfig.output_dir = nil
-    ValidatedConfig.validate
+    @validated_config.expects(:err).times(1)
+    @validated_config.output_dir = nil
+    @validated_config.validate
   end
   
   def test_custom_validation
-    ValidatedConfig.expects(:err).never
-    ValidatedConfig.output_dir = "foo"
-    assert ValidatedConfig.validate
+    @validated_config.expects(:err).never
+    @validated_config.output_dir = "foo"
+    assert @validated_config.validate
   end
 end
