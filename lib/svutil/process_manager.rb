@@ -1,7 +1,5 @@
 module SVUtil
   class ProcessManager
-    attr_accessor :after_fork
-
     def initialize(klass_or_instance, config)
       @server_instance = if klass_or_instance.instance_of?(Class)
         klass_or_instance.new
@@ -35,6 +33,10 @@ module SVUtil
         shutdown("Process Completed with Error", 1)
       end
       shutdown("Process Completed")
+    end
+
+    def after_fork(&block)
+      @after_fork = block
     end
 
     private
@@ -72,8 +74,8 @@ module SVUtil
 
       def daemonize
         fork and exit
-        @after_fork.call unless @after_fork.nil?
       	redirect_io
+        @after_fork.call unless @after_fork.nil?
       end
 
       def redirect_io
