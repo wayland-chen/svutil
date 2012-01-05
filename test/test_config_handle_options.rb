@@ -15,18 +15,19 @@ class TestConfigHandleOptions < Test::Unit::TestCase
   include SVUtil
 
   def setup
-    @my_config = MyConfig.new
   end
   
   def test_handle_options
-    @my_config.init([ "-P", "foo", "-x", "12345", "-Q" ])
-    assert @my_config.pid_file = "foo"
-    assert @my_config.x = '1234'
-    assert @my_config.restless
+    MyConfig.option_source = [ "-P", "foo", "-x", "12345", "-Q" ]
+    MyConfig.init
+    assert MyConfig.pid_file = "foo"
+    assert MyConfig.x = '1234'
+    assert MyConfig.restless
   end
 
   def test_built_in_options
-    @my_config.init([ "-d", "-P", "foo" ])
-    assert @my_config.daemon
+    MyConfig.option_source = [ "-d", "-P", "foo" ]
+    MyConfig.init
+    assert MyConfig.daemon
   end
 end

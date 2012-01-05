@@ -22,6 +22,7 @@ module SVUtil
 
     def start
       begin
+        # TODO: Daemonize will call exit in the main process resulting in an unexpected log entry (even though it forks)
         daemonize if @config.daemon
         write_pid_file
         @server_instance.run

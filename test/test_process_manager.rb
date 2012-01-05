@@ -13,25 +13,23 @@ class TestProcesManager < Test::Unit::TestCase
     @klass = mock
     @klass.stubs(:new).returns(@instance)
     @klass.stubs(:instance_of?).with(Class).returns(true)
+    ServerConfig.clear_all
   end
   
   def test_initialize
-    config = ServerConfig.new
-    ProcessManager.new(@klass, config)
+    ProcessManager.new(@klass, ServerConfig)
   end
 
   def test_initialize_and_start_with_server_instance
-    config = ServerConfig.new
-    pm = ProcessManager.new(@instance, config)
+    pm = ProcessManager.new(@instance, ServerConfig)
     @instance.expects(:run)
     assert_exit { pm.start }
   end
 
   # TODO: Could probably test this better by actually forking
   def test_start_as_daemon
-    config = ServerConfig.new
-    config.daemon = true
-    pm = ProcessManager.new(@klass, config)
+    ServerConfig.daemon = true
+    pm = ProcessManager.new(@klass, ServerConfig)
     pm.expects(:daemonize)
     pm.expects(:write_pid_file)
     pm.expects(:shutdown)
@@ -40,9 +38,8 @@ class TestProcesManager < Test::Unit::TestCase
   end
 
   def test_start_with_trace
-    config = ServerConfig.new
-    config.trace = true
-    pm = ProcessManager.new(@klass, config)
+    ServerConfig.trace = true
+    pm = ProcessManager.new(@klass, ServerConfig)
     pm.expects(:write_pid_file)
     @instance.expects(:run).raises(Exception)
     Log.expects(:error).times(2)
@@ -50,8 +47,7 @@ class TestProcesManager < Test::Unit::TestCase
   end
 
   def test_shutdown
-    config = ServerConfig.new
-    pm = ProcessManager.new(@klass, config)
+    pm = ProcessManager.new(@klass, ServerConfig)
     pm.expects(:write_pid_file)
     @instance.expects(:run)
     assert_exit { pm.start }
@@ -63,9 +59,8 @@ class TestProcesManager < Test::Unit::TestCase
   end
 
   def test_shutdown_with_trace
-    config = ServerConfig.new
-    config.trace = true
-    pm = ProcessManager.new(@klass, config)
+    ServerConfig.trace = true
+    pm = ProcessManager.new(@klass, ServerConfig)
     pm.expects(:write_pid_file)
     @instance.expects(:run)
     assert_exit { pm.start }
@@ -76,7 +71,6 @@ class TestProcesManager < Test::Unit::TestCase
     pm.expects(:remove_pid_file)
     assert_exit { pm.send(:shutdown) }
   end
-
 
   # TODO: Test all of the exceptions
 end
