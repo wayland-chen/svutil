@@ -1,5 +1,7 @@
 module SVUtil
   class ProcessManager
+    attr_writer :after_fork
+
     def initialize(klass_or_instance, config)
       @server_instance = if klass_or_instance.instance_of?(Class)
         klass_or_instance.new
@@ -70,6 +72,7 @@ module SVUtil
 
       def daemonize
         fork and exit
+        @after_fork.call unless @after.fork.nil?
       	redirect_io
       end
 
