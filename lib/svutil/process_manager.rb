@@ -25,9 +25,7 @@ module SVUtil
       write_pid_file
       begin
         @server_instance.run
-      rescue SystemExit => e
-        shutdown("System Exited")
-      rescue Exception => e
+      rescue StandardError => e
         Log.error(e.message)
         Log.error(e.backtrace.join("\n")) if @config.trace
         shutdown("Process Completed with Error", 1)
@@ -44,7 +42,7 @@ module SVUtil
         Log.info "Shutting Down (#{reason})"
         begin
           @server_instance.shutdown if @server_instance.respond_to?(:shutdown)
-        rescue Exception => e
+        rescue StandardError => e
           Log.error("Shutdown Callback threw error: #{e.message}")
           Log.error("Shutdown Callback threw error: #{e.backtrace}") if @config.trace
           Log.info("Shuting down anyway")
@@ -73,7 +71,12 @@ module SVUtil
       end
 
       def daemonize
-        fork and exit
+        pid = fork
+        if pid
+          Log.info("Forked with PID = #{pid}")
+          Process.detach(pid)
+          exit! # Exit but do not call at_exit
+        end
       	redirect_io
         @after_fork.call unless @after_fork.nil?
       end
